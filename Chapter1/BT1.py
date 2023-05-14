@@ -45,6 +45,31 @@ def Intersect(li1,li2):
             else: pos2+=1
     return result
 
+def IntersectWithSkip(li1, li2, skip=1):
+    result = []
+    pos1 = 0
+    pos2 = 0
+    skip= int(abs(min(len(li1),len(li2))))
+    print(skip)
+    while pos1 < len(li1) and pos2 < len(li2):
+        if li1[pos1] == li2[pos2]:
+            result.append(li1[pos1])
+            pos1 += 1
+            pos2 += 1
+        else:
+            if li1[pos1] < li2[pos2]:
+                if (skip+pos1<len(li1)) and li1[pos1+skip]<=li2[pos2]:
+                    while (skip+pos1<len(li1)) and li1[pos1+skip]<=li2[pos2]:
+                        pos1+=skip
+                else: pos1+=1
+            else:
+                if (skip+pos2<len(li2)) and li2[pos2+skip]<=li1[pos1]:
+                    while (skip+pos2<len(li2)) and li2[pos2+skip]<=li1[pos1]:
+                        pos2+=skip
+                else: pos2+=1
+    return result
+
+
 def booleanQuery(query, doc_list):
     result = []
     # print(query)
@@ -56,13 +81,35 @@ def booleanQuery(query, doc_list):
             result = Intersect(result, doc_list.get(term, []))
     return result
 
+def booleanQueryWithSkip(query, doc_list):
+    result = []
+    # print(query)
+    for term in query:
+        # print(term)
+        if not result:
+            result = doc_list.get(term, [])
+        else:
+            result = IntersectWithSkip(result, doc_list.get(term, []))
+    return result
+
 def main():
     stop_words = set(stopwords.words('english'))
     queries = queryStore(stop_words)
     doc = createStore(stop_words)
+    resultBooleanQuery = open("booleanQuery", "w")
+    resultBooleanQueryWithSkip = open("booleanQueryWithSkip", "w")
+
     for query, terms in queries.items():
         result = booleanQuery(terms, doc)
-        print(f"Query '{query}' matched documents: {result}")
+        # print(f"Query '{query}' matched documents: {result}")
+        resultBooleanQuery.writelines(f"{query} \n")
+        resultBooleanQueryWithSkip.writelines(f"{query} \n")
+        for a in result:
+            resultBooleanQuery.writelines(f"    {a}    ")
+            resultBooleanQueryWithSkip.writelines(f"    {a}    ")
+        resultBooleanQuery.writelines(f"\n  \ \n")
+        resultBooleanQueryWithSkip.writelines(f"\n  \ \n")
+
 
 if __name__ == "__main__":
     main()
