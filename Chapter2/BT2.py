@@ -1,3 +1,10 @@
+'''
+CD2: the vector space model
+N19DCCN046 - DANG HOANG HA
+N19DCCN047 - DANG MINH HAI
+N19DCCN106 - LAI DUC MANH
+'''
+
 from nltk.corpus import stopwords
 import math
 import re
@@ -45,10 +52,18 @@ def docStore(stopWords):
         doc_dict[segment_name] = [word for word in words if word not in stopWords]
     return doc_dict
 
-def tf(store,N):
+def tf(store):
     dict = {}
-    # for key,value in store:
-
+    subDict = {}
+    for doc in store:
+        for word in store[doc]:
+            count = store[doc].count(word)
+            subDict[word] = 1 + math.log10(count)
+            print(word)
+            print(count)
+            print(store[doc])
+            time.sleep(1)
+        dict[doc] = subDict
     return dict
 
 def idf(word_dict, N):
@@ -66,8 +81,8 @@ def main():
     doc_dict = docStore(stop_words)
     word_dict = createStore(stop_words)
     N = len(doc_dict)
-    # print(idf(word_dict,N))
-    # time.sleep(5)
+    print(tf(doc_dict))
+    time.sleep(5)
 
 
 if __name__ == "__main__":
