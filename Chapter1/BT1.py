@@ -1,42 +1,49 @@
-import nltk
 from nltk.corpus import stopwords
-listStopWord = stopwords.words('english')
 
+def createStore(stopWords):
+    text = open('doc-text').read()
+    text = text.lower()
+    segments = text.split('\n   /\n')[:-1]
+    word_dict = {}
+    for i, segment in enumerate(segments):
+        lines = segment.split('\n')
+        segment_name = lines[0].strip()
+        words = lines[1].split()
+        for word in words:
+            if word not in stopWords:
+                if word not in word_dict:
+                    word_dict[word] = []
+                word_dict[word].append(segment_name)
+    word_dict={k: word_dict[k] for k in sorted(word_dict)}
+    return word_dict
 
-def createStore():
-    f = open("doc-text", "r")
-    dic = dict()
-    posting = 1
-    for i in f:
-        for j in i.split():
-            j = j.lower()
-            if (j.isnumeric()):
-                posting = int(j)
-            else:
-                if dic.get(j) is None:
-                    dic.update({j: [posting]})
-                else:
-                    if posting not in dic[j]:
-                        dic[j].append(posting)
-    return dic
+def queryStore(stopWords):
 
+    text = open('query-text').read()
+    text = text.lower()
+    segments = text.split('/\n')[:-1]
+    query_dict = {}
+    for i, segment in enumerate(segments):
+        lines = segment.strip().split('\n')
+        segment_name = str(i + 1)
+        words = lines[1].split()
+        query_dict[segment_name] = [word for word in words if word not in stopWords]
+        query_dict[segment_name].sort()
+    return query_dict
 
-def Intersect(li1, li2):
-    result = []
-    pos1 = 0
-    pos2 = 0
-    while pos1 < len(li1) and pos2 < len(li2):
-            if li1[pos1] == li2[pos2]:
-                result.append(li1[pos1])
-                pos1 += 1
-                pos2 += 1
-            else:
-                if li1[pos1] < li2[pos2]:
-                    pos1 += 1
-                else:
-                    pos2 += 1
+def Intersect(li1,li2):
+    result =[]
+    pos1=0
+    pos2=0
+    while pos1<len(li1) and pos2<len(li2):
+        if li1[pos1]==li2[pos2]:
+            result.append(li1[pos1])
+            pos1+=1
+            pos2+=1
+        else:
+            if li1[pos1]<li2[pos2]: pos1+=1
+            else: pos2+=1
     return result
-
 
 def IntersectWithSkip(li1, li2, skip=1):
     result = []
@@ -63,35 +70,46 @@ def IntersectWithSkip(li1, li2, skip=1):
     return result
 
 
-def readQuery():
-    f = open("query-text", "r").read().splitlines()
-    print(f)
-    dic = dict()
-    pos = 1
-    for i in f:
-        if i.isnumeric():
-            pos = int(i)
-            continue
-        if i == '/':
-            continue
-        dic.update({str(pos): i.lower()})
-    return dic
+def booleanQuery(query, doc_list):
+    result = []
+    # print(query)
+    for term in query:
+        # print(term)
+        if not result:
+            result = doc_list.get(term, [])
+        else:
+            result = Intersect(result, doc_list.get(term, []))
+    return result
+
+def booleanQueryWithSkip(query, doc_list):
+    result = []
+    # print(query)
+    for term in query:
+        # print(term)
+        if not result:
+            result = doc_list.get(term, [])
+        else:
+            result = IntersectWithSkip(result, doc_list.get(term, []))
+    return result
+
+def main():
+    stop_words = set(stopwords.words('english'))
+    queries = queryStore(stop_words)
+    doc = createStore(stop_words)
+    resultBooleanQuery = open("booleanQuery", "w")
+    resultBooleanQueryWithSkip = open("booleanQueryWithSkip", "w")
+
+    for query, terms in queries.items():
+        result = booleanQuery(terms, doc)
+        # print(f"Query '{query}' matched documents: {result}")
+        resultBooleanQuery.writelines(f"{query} \n")
+        resultBooleanQueryWithSkip.writelines(f"{query} \n")
+        for a in result:
+            resultBooleanQuery.writelines(f"    {a}    ")
+            resultBooleanQueryWithSkip.writelines(f"    {a}    ")
+        resultBooleanQuery.writelines(f"\n  \ \n")
+        resultBooleanQueryWithSkip.writelines(f"\n  \ \n")
 
 
-def rlv_ass():
-    store = createStore()
-    list_query = readQuery()
-    for i in list_query:
-        query = list_query.get(i)
-        result = store.get(query.split()[0])
-        for j in query.split():
-            result = Intersect(result, store.get(j) if store.get(j) is not None else result)
-        print(i+':  ', result)
-
-# print(readQuery())
-# rlv_ass()
-a= createStore()
-print(a)
-# kq= Intersect([1,2,3,4,5],[1,3,5])
-# print(kq)
-# print(IntersectWithSkip([1,2,3,8,11,17,21,31],[2,4,8,41,48,64,128],))
+if __name__ == "__main__":
+    main()
