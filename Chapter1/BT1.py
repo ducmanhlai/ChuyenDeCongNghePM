@@ -13,7 +13,8 @@ def createStore(stopWords):
             if word not in stopWords:
                 if word not in word_dict:
                     word_dict[word] = []
-                word_dict[word].append(segment_name)
+                if segment_name not in word_dict[word]:
+                    word_dict[word].append(segment_name)
     word_dict={k: word_dict[k] for k in sorted(word_dict)}
     return word_dict
 
