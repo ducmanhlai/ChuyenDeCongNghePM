@@ -8,17 +8,17 @@ def createStore(stopWords):
     for i, segment in enumerate(segments):
         lines = segment.split('\n')
         segment_name = lines[0].strip()
-        words = lines[1].split()
+        words = [' '.join(lines[1:])]
         for word in words:
             if word not in stopWords:
                 if word not in word_dict:
                     word_dict[word] = []
-                word_dict[word].append(segment_name)
-    word_dict = {k: word_dict[k] for k in word_dict}
+                if segment_name not in word_dict[word]:
+                    word_dict[word].append(segment_name)
+    word_dict={k: word_dict[k] for k in sorted(word_dict)}
     return word_dict
 
-
-def store(file, stopWords):
+def store(file,stopWords):
     text = open(file).read()
     text = text.lower()
     segments = text.split('/\n')[:-1]
@@ -26,10 +26,12 @@ def store(file, stopWords):
     for i, segment in enumerate(segments):
         lines = segment.strip().split('\n')
         segment_name = str(i + 1)
-        words = lines[1].split()
-        query_dict[segment_name] = [
-            word for word in words if word not in stopWords]
+        # print(lines)
+        words = [' '.join(lines[1:])]
+        query_dict[segment_name] = [word for word in words if word not in stopWords]
     return query_dict
+
+
 def count(doc,word):
     tmp=0
     for i in doc:
@@ -49,7 +51,8 @@ def Score(N,queries_dict,docs_dict,word_dict):
 def Avdl(docs_dict):
    tmp=0
    for i in docs_dict:
-       tmp+=len(docs_dict[i])
+       tmp+=len(docs_dict[i][0].split(' '))
+       print(i,':  ',docs_dict[i][0].split(' ').remove(''))
    return tmp/len(docs_dict)
 def main():
     stop_words = set(stopwords.words('english'))
@@ -58,7 +61,7 @@ def main():
     queries_dict = store('query-text',stop_words)
     #inverted index dict{word not in stop word: [list doc name word appear]}
     word_dict = createStore(stop_words)
-    N = len(docs_dict)     
+    # N = len(docs_dict)     
     print(Avdl(docs_dict))   
     # Score(N,queries_dict,docs_dict,word_dict)
 if __name__ == "__main__":
