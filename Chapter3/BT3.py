@@ -40,7 +40,9 @@ def store(file,stopWords):
     for i, segment in enumerate(segments):
         lines = segment.strip().split('\n')
         segment_name = str(i + 1)
-        words = lines[1].split()
+        words = []
+        for i in range(1,len(lines)):
+            words.extend(lines[i].split())
         query_dict[segment_name] = [word for word in words if word not in stopWords]
     return query_dict
 
