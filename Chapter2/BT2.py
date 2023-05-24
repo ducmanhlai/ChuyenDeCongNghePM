@@ -18,8 +18,12 @@ def createStore(stopWords):
     word_dict = {}
     for i, segment in enumerate(segments):
         lines = segment.split('\n')
-        segment_name = lines[0].strip()
-        words = lines[1].split()
+        words = []
+        for i in range(0,len(lines)):
+            if i ==0:
+                segment_name = lines[i].strip()
+            else:
+                words.extend(lines[i].split())
         for word in words:
             if word not in stopWords:
                 if word not in word_dict:
@@ -37,7 +41,9 @@ def store(file,stopWords):
     for i, segment in enumerate(segments):
         lines = segment.strip().split('\n')
         segment_name = str(i + 1)
-        words = lines[1].split()
+        words = []
+        for i in range(1,len(lines)):
+            words.extend(lines[i].split())
         query_dict[segment_name] = [word for word in words if word not in stopWords]
     return query_dict
 
@@ -104,20 +110,22 @@ def main():
     #inverted index dict{word not in stop word: [list doc name word appear]}
     word_dict = createStore(stop_words)
 
-    N = len(docs_dict)
+    print(word_dict)
 
-    #idf of list word in inverted index word_idf{word: idf value}
-    word_idf = idf(word_dict,N)
-
-    score = simScore(queries_dict,docs_dict,word_idf)
-
-    for query in score:
-        result.writelines(f"{query} \n")
-        sorted_items = sorted(score[query].items(), key=lambda x: x[1], reverse=True)
-        top_10 = sorted_items[:10]
-        for doc in top_10:
-            result.writelines(f"    {doc}    ")
-        result.writelines(f"\n  \ \n")
+    # N = len(docs_dict)
+    #
+    # #idf of list word in inverted index word_idf{word: idf value}
+    # word_idf = idf(word_dict,N)
+    #
+    # score = simScore(queries_dict,docs_dict,word_idf)
+    #
+    # for query in score:
+    #     result.writelines(f"{query} \n")
+    #     sorted_items = sorted(score[query].items(), key=lambda x: x[1], reverse=True)
+    #     top_10 = sorted_items[:10]
+    #     for doc in top_10:
+    #         result.writelines(f"    {doc}    ")
+    #     result.writelines(f"\n  \ \n")
 
 
 if __name__ == "__main__":
