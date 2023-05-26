@@ -10,9 +10,12 @@ import math
 import re
 import time
 
+Doc_Text = 'doc-text'
+Query_Text = 'query-text'
+
 
 def createStore(stopWords):
-    text = open('doc-text').read()
+    text = open(Doc_Text).read()
     text = text.lower()
     segments = text.split('\n   /\n')[:-1]
     word_dict = {}
@@ -33,10 +36,13 @@ def createStore(stopWords):
     word_dict={k: word_dict[k] for k in sorted(word_dict)}
     return word_dict
 
-def store(file,stopWords):
+def store(file,stopWords,q=Query_Text):
     text = open(file).read()
     text = text.lower()
-    segments = text.split('/\n')[:-1]
+    if file == q:
+        segments = text.split('\n/\n')[:-1]
+    else:
+        segments = text.split('\n   /\n')[:-1]
     query_dict = {}
     for i, segment in enumerate(segments):
         lines = segment.strip().split('\n')
@@ -104,28 +110,26 @@ def main():
 
 
     #dict{docName/queryName: listword in doc/query}
-    docs_dict = store('doc-text',stop_words)
-    queries_dict = store('query-text',stop_words)
+    queries_dict = store(Query_Text,stop_words)
+    docs_dict = store(Doc_Text,stop_words)
 
     #inverted index dict{word not in stop word: [list doc name word appear]}
     word_dict = createStore(stop_words)
 
-    print(word_dict)
+    N = len(docs_dict)
 
-    # N = len(docs_dict)
-    #
-    # #idf of list word in inverted index word_idf{word: idf value}
-    # word_idf = idf(word_dict,N)
-    #
-    # score = simScore(queries_dict,docs_dict,word_idf)
-    #
-    # for query in score:
-    #     result.writelines(f"{query} \n")
-    #     sorted_items = sorted(score[query].items(), key=lambda x: x[1], reverse=True)
-    #     top_10 = sorted_items[:10]
-    #     for doc in top_10:
-    #         result.writelines(f"    {doc}    ")
-    #     result.writelines(f"\n  \ \n")
+    #idf of list word in inverted index word_idf{word: idf value}
+    word_idf = idf(word_dict,N)
+
+    score = simScore(queries_dict,docs_dict,word_idf)
+
+    for query in score:
+        result.writelines(f"{query} \n")
+        sorted_items = sorted(score[query].items(), key=lambda x: x[1], reverse=True)
+        top_10 = sorted_items[:10]
+        for doc in top_10:
+            result.writelines(f"    {doc}    ")
+        result.writelines(f"\n  \ \n")
 
 
 if __name__ == "__main__":
