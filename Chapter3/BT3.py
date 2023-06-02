@@ -125,7 +125,15 @@ def main():
     N = len(docs_dict)
 
     result = run(N,word_dict,queries_dict,docs_dict)
-    print(result)
+    # print(result)
+    outFile = open("Probability_Estimates", "w")
+
+    for query in result:
+        outFile.writelines(f"{query} \n")
+        for doc in result[query]:
+            outFile.writelines(f"    {doc}    ")
+        outFile.writelines(f"\n  \ \n")
+
 
 
 
