@@ -1,5 +1,10 @@
-my_list = ['pattern detection', 'and recognition']
+import numpy as np
 
-new_string = ' '.join(my_list)
+# Create a NumPy array
+arr = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 
-print(new_string)
+# Get the indices of the top 10 elements
+indices = np.argsort(arr)[-2:]
+
+# Print the indices
+print(indices)

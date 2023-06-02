@@ -1,3 +1,2 @@
 
-        print(segment)
-        segment_name = str(i + 1)
+   for i in docs_dict:

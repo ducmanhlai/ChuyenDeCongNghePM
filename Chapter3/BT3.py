@@ -123,7 +123,7 @@ def main():
     word_dict = createStore(stop_words)
 
     N = len(docs_dict)
-
+    # print(docs_dict)
     result = run(N,word_dict,queries_dict,docs_dict)
     print(result)
 
